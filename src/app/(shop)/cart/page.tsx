@@ -12,13 +12,13 @@ const productsInCart = [
   initialData.products[2]
 ];
 
-export default function () {
+export default function CartPage() {
   // redirect('/empty');
 
   return (
     <div className="flex justify-center items-center mb-72 px-10 sm:px-0">
       <div className="flex flex-col w-[1000px]">
-        <Title title="Carrito" />
+        <Title title="Carrito" subtitle="" />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
           {/* Carrito */}

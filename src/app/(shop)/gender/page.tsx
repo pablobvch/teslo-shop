@@ -1,0 +1,7 @@
+export default function GenderPage() {
+  return (
+    <div>
+      <h1>Cart Page</h1>
+    </div>
+  );
+}

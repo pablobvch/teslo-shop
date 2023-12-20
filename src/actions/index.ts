@@ -1,1 +1,1 @@
-export * from "./product/productPagination.ts";
+export * from "./product/productPagination";

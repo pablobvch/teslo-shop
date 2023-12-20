@@ -1,10 +1,12 @@
+export const revalidate = false;
+
 import Image from "next/image";
 import { titleFont } from "@/config/fonts";
 import { Title } from "@/components/ui/title/Title";
 import { initialData } from "@/seed/seed";
 import { Pagination, ProductGrid } from "@/components";
 import { getPaginatedProductsWithImages } from "@/actions";
-import { redirect } from "next/dist/server/api-utils";
+import { redirect } from "next/navigation";
 
 interface Props {
   searchParams: {

@@ -1,6 +1,6 @@
 "use client";
+
 import { useState } from "react";
-import Image from "next/image";
 
 import { Swiper as SwiperObject } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -12,6 +12,7 @@ import "swiper/css/navigation";
 import "swiper/css/thumbs";
 
 import "./slideshow.css";
+import Image from "next/image";
 
 interface Props {
   images: string[];
@@ -20,7 +21,7 @@ interface Props {
 }
 
 export const ProductSlideshow = ({ images, title, className }: Props) => {
-  const [thumbsSwiper, setThumbsSwiper] = useState<SwiperObject>(null);
+  const [thumbsSwiper, setThumbsSwiper] = useState<SwiperObject>();
 
   return (
     <div className={className}>
