@@ -11,7 +11,7 @@ import {
 } from "@/components";
 import { getProductBySlug } from "@/actions";
 import { StockLabel } from "../../../../components/product/stock-label/StockLabel";
-import { ResolvingMetadata } from "next";
+import { Metadata, ResolvingMetadata } from "next";
 import { AddToCart } from "./ui/AddToCart";
 
 interface Props {
@@ -21,7 +21,7 @@ interface Props {
 }
 
 export async function generateMetadata(
-  { params, searchParams }: Props,
+  { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   // read route params
@@ -31,10 +31,10 @@ export async function generateMetadata(
   const product = await getProductBySlug(slug);
 
   return {
-    title: product.title ?? "Producto no encontrado",
+    title: product?.title ?? "Producto no encontrado",
     description: product?.description ?? "",
     openGraph: {
-      title: product.title ?? "Producto no encontrado",
+      title: product?.title ?? "Producto no encontrado",
       description: product?.description ?? "",
       images: [`/products/${product?.images[1]}`]
     }

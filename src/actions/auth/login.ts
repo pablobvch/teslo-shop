@@ -21,7 +21,7 @@ export async function authenticate(
   }
 }
 
-export async function login(name: string, password: string) {
+export async function login(email: string, password: string) {
   try {
     await signIn("credentials", { email, password });
   } catch (error) {

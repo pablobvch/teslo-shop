@@ -35,11 +35,7 @@ export default async function GenderByPage({ params, searchParams }: Props) {
     women: "para mujeres",
     kid: "para niños",
     unisex: "para todos"
-  };
-
-  // if ( id === 'kids' ) {
-  //   notFound();
-  // }
+  }; //Record significa que es un objeto de tipo clave string y valor string
 
   return (
     <>

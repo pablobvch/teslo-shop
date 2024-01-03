@@ -13,23 +13,9 @@ export const authConfig: NextAuthConfig = {
     newUser: "/auth/new-account"
   },
   callbacks: {
-    // authorized({ auth, request: { nextUrl } }) {
-    //   // const isLoggedIn = !!auth?.user;
-    //   // const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
-    //   // if (isOnDashboard) {
-    //   //   if (isLoggdIn) return true;
-    //   //   return false; // Redirect unauthenticated users to login page
-    //   // } else if (isLoggedIn) {
-    //   //   return Response.redirect(new URL("/dashboard", nextUrl));
-    //   // }
-    //   // return true;
-    //   // console.log({ auth });
-    // },
-
     authorized({ auth, request: { nextUrl } }) {
       //TODO: chequear si se puede aplicar middleware en lugar de hacer la validacion manual como la estamos haciendo en el curso
       //Aparentemente a mi me funciona
-      console.log({ auth });
       return true;
     },
 
@@ -48,7 +34,6 @@ export const authConfig: NextAuthConfig = {
   providers: [
     Credentials({
       async authorize(credentials) {
-        console.log("authorize");
         const parsedCredentials = z
           .object({ email: z.string().email(), password: z.string().min(6) })
           .safeParse(credentials);

@@ -21,8 +21,6 @@ export const RegisterForm = () => {
 
   const [errorMessage, setErrorMessage] = useState("");
 
-  const router = useRouter();
-
   const onSubmit = async (data: FormImputs) => {
     //Server action
     setErrorMessage("");
@@ -59,8 +57,9 @@ export const RegisterForm = () => {
         type="string"
         {...register("email", {
           required: true,
-          pattern:
+          pattern: new RegExp(
             "([!#-'*+/-9=?A-Z^-~-]+(.[!#-'*+/-9=?A-Z^-~-]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(.[!#-'*+/-9=?A-Z^-~-]+)*|[[\t -Z^-~]*])"
+          )
         })}
       />
 
