@@ -11,3 +11,7 @@ export * from "./country/getCountries";
 export * from "./product/getProductBySlug";
 export * from "./product/getStockBySlug";
 export * from "./product/productPagination";
+
+export * from "./order/placeOrder";
+export * from "./order/getOrderById";
+export * from "./order/getOrdersByUser";

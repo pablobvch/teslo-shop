@@ -1,13 +1,14 @@
 "use client";
-import type { Address, Country } from "@/interfaces";
-import clsx from "clsx";
-import Link from "next/link";
-import React, { useEffect } from "react";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
-import { countries } from "../../../../../seed/seedCountries";
+import clsx from "clsx";
+
+import type { Address, Country } from "@/interfaces";
 import { useAddressStore } from "@/store";
 import { deleteUserAddress, setUserAddress } from "@/actions";
-import { useSession } from "next-auth/react";
 
 type FormInputs = {
   firstName: string;
@@ -23,23 +24,29 @@ type FormInputs = {
 
 interface Props {
   countries: Country[];
-  userStoredAddress?: Partial<Address>; //esto significa que todas las propiedades de Address pasan a ser opcionales
+  userStoredAddress?: Partial<Address>;
 }
 
 export const AddressForm = ({ countries, userStoredAddress = {} }: Props) => {
+  const router = useRouter();
   const {
     handleSubmit,
     register,
     formState: { isValid },
     reset
   } = useForm<FormInputs>({
-    defaultValues: { ...(userStoredAddress as any), rememberAddress: false }
+    defaultValues: {
+      ...(userStoredAddress as any),
+      rememberAddress: false
+    }
+  });
+
+  const { data: session } = useSession({
+    required: true
   });
 
   const setAddress = useAddressStore((state) => state.setAddress);
   const address = useAddressStore((state) => state.address);
-
-  const { data: session } = useSession({ required: true });
 
   useEffect(() => {
     if (address.firstName) {
@@ -48,10 +55,12 @@ export const AddressForm = ({ countries, userStoredAddress = {} }: Props) => {
   }, [address, reset]);
 
   const onSubmit = async (data: FormInputs) => {
-    setAddress(data);
-    const { rememberAddress, ...rest } = data;
-    if (data.rememberAddress) {
-      await setUserAddress(rest, session!.user.id);
+    const { rememberAddress, ...restAddress } = data;
+
+    setAddress(restAddress);
+
+    if (rememberAddress) {
+      await setUserAddress(restAddress, session!.user.id);
     } else {
       await deleteUserAddress(session!.user.id);
     }
@@ -125,14 +134,11 @@ export const AddressForm = ({ countries, userStoredAddress = {} }: Props) => {
           {...register("country", { required: true })}
         >
           <option value="">[ Seleccione ]</option>
-          {/* <option value="CRI">Costa Rica</option> */}
-          {countries.map((country) => {
-            return (
-              <option key={country.id} value={country.id}>
-                {country.name}
-              </option>
-            );
-          })}
+          {countries.map((country) => (
+            <option key={country.id} value={country.id}>
+              {country.name}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -146,7 +152,7 @@ export const AddressForm = ({ countries, userStoredAddress = {} }: Props) => {
       </div>
 
       <div className="flex flex-col mb-2 sm:mt-1">
-        <div className="inline-flex items-center mb-10">
+        <div className="inline-flex items-center mb-10 ">
           <label
             className="relative flex cursor-pointer items-center rounded-full p-3"
             htmlFor="checkbox"
@@ -156,7 +162,6 @@ export const AddressForm = ({ countries, userStoredAddress = {} }: Props) => {
               className="border-gray-500 before:content[''] peer relative h-5 w-5 cursor-pointer appearance-none rounded-md border border-blue-gray-200 transition-all before:absolute before:top-2/4 before:left-2/4 before:block before:h-12 before:w-12 before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-blue-gray-500 before:opacity-0 before:transition-opacity checked:border-blue-500 checked:bg-blue-500 checked:before:bg-blue-500 hover:before:opacity-10"
               id="checkbox"
               {...register("rememberAddress")}
-              // checked
             />
             <div className="pointer-events-none absolute top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 text-white opacity-0 transition-opacity peer-checked:opacity-100">
               <svg
@@ -175,14 +180,19 @@ export const AddressForm = ({ countries, userStoredAddress = {} }: Props) => {
               </svg>
             </div>
           </label>
-          <span>Recordar direccion</span>
+
+          <span>¿Recordar dirección?</span>
         </div>
 
         <button
-          type="submit"
           disabled={!isValid}
+          // href="/checkout"
+          type="submit"
           // className="btn-primary flex w-full sm:w-1/2 justify-center "
-          className={clsx({ "btn-primary": isValid, "btn-disabled": !isValid })}
+          className={clsx({
+            "btn-primary": isValid,
+            "btn-disabled": !isValid
+          })}
         >
           Siguiente
         </button>
