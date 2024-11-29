@@ -12,9 +12,15 @@ export * from "./product/getProductBySlug";
 export * from "./product/getStockBySlug";
 export * from "./product/productPagination";
 
+export * from "./category/getCategories";
+
 export * from "./order/placeOrder";
 export * from "./order/getOrderById";
 export * from "./order/getOrdersByUser";
+export * from "./order/getPaginatedOrders";
 
 export * from "./payments/setTransactionId";
 export * from "./payments/paypalCheckPayment";
+
+export * from "./user/getPaginatedUsers";
+export * from "./user/changeUserRole";

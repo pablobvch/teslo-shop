@@ -78,8 +78,6 @@ const getPayPalBearerToken = async (): Promise<string | null> => {
     body: urlencoded
   };
 
-  console.log({ base64Token, PAYPAL_CLIENT_ID, PAYPAL_SECRET_KEY });
-
   try {
     const result = await fetch(oauth2Url, {
       ...requestOptions,
@@ -112,7 +110,6 @@ const verifyPayPalPayment = async (
       ...requestOptions,
       cache: "no-store" //esto evita el error de cache para el recupero del token
     }).then((r) => r.json());
-    console.log({ resp });
     return resp;
   } catch (error) {
     console.log(error);

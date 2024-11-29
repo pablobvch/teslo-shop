@@ -1,28 +1,25 @@
 "use client";
 
-import { placeOrder } from "@/actions";
-import { titleFont } from "@/config/fonts";
-import { useAddressStore, useCartStore } from "@/store";
-import { currencyFormat, sleep } from "@/utils";
-import clsx from "clsx";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import clsx from "clsx";
+
+import { placeOrder } from "@/actions";
+import { useAddressStore, useCartStore } from "@/store";
+import { currencyFormat } from "@/utils";
 
 export const PlaceOrder = () => {
+  const router = useRouter();
   const [loaded, setLoaded] = useState(false);
-  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   const address = useAddressStore((state) => state.address);
 
-  const router = useRouter();
-
-  const { subTotal, tax, total, itemsInCart } = useCartStore((state) =>
+  const { itemsInCart, subTotal, tax, total } = useCartStore((state) =>
     state.getSummaryInformation()
   );
-
   const cart = useCartStore((state) => state.cart);
-
   const clearCart = useCartStore((state) => state.clearCart);
 
   useEffect(() => {
@@ -31,44 +28,40 @@ export const PlaceOrder = () => {
 
   const onPlaceOrder = async () => {
     setIsPlacingOrder(true);
+    // await sleep(2);
 
     const productsToOrder = cart.map((product) => ({
       productId: product.id,
       quantity: product.quantity,
       size: product.size
     }));
-    console.log({ address });
-    const resp = await placeOrder(productsToOrder, address);
 
+    //! Server Action
+    const resp = await placeOrder(productsToOrder, address);
     if (!resp.ok) {
       setIsPlacingOrder(false);
       setErrorMessage(resp.message);
       return;
     }
 
+    //* Todo salio bien!
     clearCart();
-    router.replace("/orders/" + resp.order?.id);
+    window.location.replace("/orders/" + resp.order?.id);
   };
 
   if (!loaded) {
-    return (
-      <h1
-        className={`${titleFont.className} antialiased font-bold text-lg animate-pulse bg-gray-200 w-full`}
-      >
-        &nbsp;
-      </h1>
-    );
+    return <p>Cargando...</p>;
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-xl p-7 h-fit">
-      <h2 className="text-2xl mb-2">Direccion de entrega</h2>
+    <div className="bg-white rounded-xl shadow-xl p-7">
+      <h2 className="text-2xl mb-2">Dirección de entrega</h2>
       <div className="mb-10">
         <p className="text-xl">
           {address.firstName} {address.lastName}
         </p>
-        <p className="font-bold">{address.address}</p>
-        <p className="font-bold">{address.address2}</p>
+        <p>{address.address}</p>
+        <p>{address.address2}</p>
         <p>{address.postalCode}</p>
         <p>
           {address.city}, {address.country}
@@ -76,14 +69,15 @@ export const PlaceOrder = () => {
         <p>{address.phone}</p>
       </div>
 
-      <div className="w-full h-0.5 rounded bg-gray-200 mb-10"></div>
+      {/* Divider */}
+      <div className="w-full h-0.5 rounded bg-gray-200 mb-10" />
 
       <h2 className="text-2xl mb-2">Resumen de orden</h2>
 
       <div className="grid grid-cols-2">
         <span>No. Productos</span>
         <span className="text-right">
-          {itemsInCart} {itemsInCart === 1 ? "articulo" : "articulos"}
+          {itemsInCart === 1 ? "1 artículo" : `${itemsInCart} artículos`}
         </span>
 
         <span>Subtotal</span>
@@ -117,11 +111,11 @@ export const PlaceOrder = () => {
 
         <button
           // href="/orders/123"
+          onClick={onPlaceOrder}
           className={clsx({
             "btn-primary": !isPlacingOrder,
             "btn-disabled": isPlacingOrder
           })}
-          onClick={() => onPlaceOrder()}
         >
           Colocar orden
         </button>

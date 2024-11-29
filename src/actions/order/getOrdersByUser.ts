@@ -5,7 +5,6 @@ import prisma from "@/lib/prisma";
 import okta from "next-auth/providers/okta";
 
 export const getOrdersByUser = async () => {
-  console.log("getOrderByUser");
   const session = await auth();
 
   if (!session?.user) {
@@ -23,8 +22,6 @@ export const getOrdersByUser = async () => {
       }
     }
   });
-
-  console.log({ orders });
 
   return {
     ok: true,

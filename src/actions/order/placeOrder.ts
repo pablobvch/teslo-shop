@@ -1,4 +1,5 @@
 "use server";
+
 import prisma from "@/lib/prisma";
 
 import { auth } from "@/auth.config";
@@ -14,6 +15,7 @@ export const placeOrder = async (
   productIds: ProductToOrder[],
   address: Address
 ) => {
+  debugger;
   const session = await auth();
   const userId = session?.user.id;
 
@@ -121,7 +123,6 @@ export const placeOrder = async (
       // Address
       // const { country, rememberAddress, ...rest } = address;
       const { country, ...rest } = address;
-      console.log({ rest });
       const orderAddress = await tx.orderAddress.create({
         data: {
           firstName: rest.firstName,
