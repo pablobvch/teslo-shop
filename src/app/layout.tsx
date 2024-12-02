@@ -8,11 +8,7 @@ export const metadata: Metadata = {
   description: "Una tienda virtual de productos"
 };
 
-export default function RootLayout({
-  children
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React }) {
   return (
     <html lang="en">
       <body className={inter.className}>

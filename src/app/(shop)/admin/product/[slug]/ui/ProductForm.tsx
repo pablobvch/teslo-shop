@@ -1,10 +1,15 @@
 "use client";
 
-import { Category, Product } from "@/interfaces";
+import { createUpdateProduct } from "@/actions";
+import { revalidate } from "@/app/(shop)/page";
+import { Category, Product, ProductImage } from "@/interfaces";
+import clsx from "clsx";
+import { revalidatePath } from "next/cache";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 
 interface Props {
-  product: Product;
+  product: Partial<Product> & { ProductImage?: ProductImage[] };
   categories: Category[];
 }
 
@@ -28,24 +33,60 @@ export const ProductForm = ({ product, categories }: Props) => {
   const {
     handleSubmit,
     register,
-    formState: { isValid }
+    formState: { isValid },
+    getValues,
+    setValue,
+    watch
   } = useForm<FormInputs>({
     defaultValues: {
       ...product,
-      tags: product.tags.join(", "),
+      tags: product.tags?.join(", "),
       sizes: product.sizes ?? []
       //TODO Images
     }
   });
 
+  watch("sizes"); //redibuja el form luego de hacer setValue
+
+  const onSizeChange = (size: string) => {
+    //Set es un arreglo que no permite duplicados
+    const sizes = getValues("sizes");
+
+    const updatedSizes = sizes.includes(size)
+      ? sizes.filter((s) => s !== size)
+      : [...sizes, size];
+
+    setValue("sizes", updatedSizes);
+  };
+
   const onSubmit = async (data: FormInputs) => {
-    console.log({ data });
+    console.log("onSubmit");
+    const formData = new FormData(); //objeto de tipo Form
+    const { ...productToSave } = data;
+    //hacer submit de un objeto FormData para que viaje al back
+    if (product.id) {
+      formData.append("id", product.id ?? "");
+    }
+
+    formData.append("title", productToSave.title);
+    formData.append("slug", productToSave.slug);
+    formData.append("description", productToSave.description);
+    formData.append("price", productToSave.price.toString());
+    formData.append("inStock", productToSave.inStock.toString());
+    formData.append("sizes", productToSave.sizes.toString());
+    formData.append("tags", productToSave.tags);
+    formData.append("categoryId", productToSave.categoryId);
+    formData.append("gender", productToSave.gender);
+
+    const { ok } = await createUpdateProduct(formData);
+
+    console.log({ ok });
   };
 
   return (
     <form
-      className="grid px-5 mb-16 grid-cols-1 sm:px-0 sm:grid-cols-2 gap-3"
       onSubmit={handleSubmit(onSubmit)}
+      className="grid px-5 mb-16 grid-cols-1 sm:px-0 sm:grid-cols-2 gap-3"
     >
       {/* Textos */}
       <div className="w-full">
@@ -128,6 +169,15 @@ export const ProductForm = ({ product, categories }: Props) => {
 
       {/* Selector de tallas y fotos */}
       <div className="w-full">
+        <div className="flex flex-col mb-2">
+          <span>Inventario</span>
+          <input
+            type="number"
+            className="p-2 border rounded-md bg-gray-200"
+            {...register("inStock", { required: true, min: 0 })}
+          />
+        </div>
+
         {/* As checkboxes */}
         <div className="flex flex-col">
           <span>Tallas</span>
@@ -136,7 +186,13 @@ export const ProductForm = ({ product, categories }: Props) => {
               // bg-blue-500 text-white <--- si está seleccionado
               <div
                 key={size}
-                className="flex  items-center justify-center w-10 h-10 mr-2 border rounded-md"
+                onClick={() => onSizeChange(size)}
+                className={clsx(
+                  "p-2 border cursor-pointer rounded-md mr-2 mb-2 w-14 transition-all text-center",
+                  {
+                    "bg-blue-500 text-white": getValues("sizes").includes(size)
+                  }
+                )}
               >
                 <span>{size}</span>
               </div>
@@ -151,6 +207,27 @@ export const ProductForm = ({ product, categories }: Props) => {
               className="p-2 border rounded-md bg-gray-200"
               accept="image/png, image/jpeg"
             />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {product.ProductImage?.map((image) => (
+              <div key={image.id}>
+                <Image
+                  alt={product.title}
+                  src={`/products/${image.url}`}
+                  width={300}
+                  height={300}
+                  className="rounded-t shadow-md"
+                />
+                <button
+                  type="button"
+                  onClick={() => console.log({ id: image.id, url: image.url })}
+                  className="btn-danger rounded-b-xl w-full"
+                >
+                  Eliminar
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       </div>
