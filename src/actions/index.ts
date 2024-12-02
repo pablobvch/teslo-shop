@@ -12,6 +12,7 @@ export * from "./product/getProductBySlug";
 export * from "./product/getStockBySlug";
 export * from "./product/productPagination";
 export * from "./product/createUpdateProduct";
+export * from "./product/deleteProductImage";
 
 export * from "./category/getCategories";
 
