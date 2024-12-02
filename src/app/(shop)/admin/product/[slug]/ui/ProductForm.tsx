@@ -74,7 +74,6 @@ export const ProductForm = ({ product, categories }: Props) => {
   };
 
   const onSubmit = async (data: FormInputs) => {
-    console.log("onSubmit");
     const formData = new FormData(); //objeto de tipo Form
     const { images, ...productToSave } = data;
     //hacer submit de un objeto FormData para que viaje al back
@@ -97,8 +96,6 @@ export const ProductForm = ({ product, categories }: Props) => {
         formData.append("images", images[i]);
       }
     }
-    console.log({ images });
-    // formData.
 
     const { ok, product: updatedProduct } = await createUpdateProduct(formData);
 
