@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 
 export const setTransactionId = async (
-  orderId: number,
+  orderId: string,
   transactionId: string
 ) => {
   try {
@@ -20,9 +20,11 @@ export const setTransactionId = async (
     };
   } catch (error) {
     console.log(error);
-    return {
-      ok: false,
-      message: error.message
-    };
+    if (error instanceof Error) {
+      return {
+        ok: false,
+        message: error.message
+      };
+    }
   }
 };

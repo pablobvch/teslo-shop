@@ -1,25 +1,19 @@
 "use client";
 
-import {
-  createUpdateProduct,
-  deleteProductImage,
-  registerUser
-} from "@/actions";
-import { revalidate } from "@/app/(shop)/page";
-import { ProductImage } from "@/components";
+import { useForm } from "react-hook-form";
 import {
   Category,
   Product,
-  ProductImage as PruductWithImage
+  ProductImage as ProductWithImage
 } from "@/interfaces";
-import clsx from "clsx";
-import { revalidatePath } from "next/cache";
 import Image from "next/image";
+import clsx from "clsx";
+import { createUpdateProduct, deleteProductImage } from "@/actions";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { ProductImage } from "@/components";
 
 interface Props {
-  product: Partial<Product> & { ProductImage?: PruductWithImage[] };
+  product: Partial<Product> & { ProductImage?: ProductWithImage[] };
   categories: Category[];
 }
 
@@ -30,13 +24,12 @@ interface FormInputs {
   slug: string;
   description: string;
   price: number;
-  // categoryId: number;
   inStock: number;
-  sizes: string;
+  sizes: string[];
   tags: string;
   gender: "men" | "women" | "kid" | "unisex";
+  categoryId: string;
 
-  //TODO images
   images?: FileList;
 }
 
@@ -55,28 +48,24 @@ export const ProductForm = ({ product, categories }: Props) => {
       ...product,
       tags: product.tags?.join(", "),
       sizes: product.sizes ?? [],
-      //TODO Images
+
       images: undefined
     }
   });
 
-  watch("sizes"); //redibuja el form luego de hacer setValue
+  watch("sizes");
 
-  const onSizeChange = (size: string) => {
-    //Set es un arreglo que no permite duplicados
-    const sizes = getValues("sizes");
-
-    const updatedSizes = sizes.includes(size)
-      ? sizes.filter((s) => s !== size)
-      : [...sizes, size];
-
-    setValue("sizes", updatedSizes);
+  const onSizeChanged = (size: string) => {
+    const sizes = new Set(getValues("sizes"));
+    sizes.has(size) ? sizes.delete(size) : sizes.add(size);
+    setValue("sizes", Array.from(sizes));
   };
 
   const onSubmit = async (data: FormInputs) => {
-    const formData = new FormData(); //objeto de tipo Form
+    const formData = new FormData();
+
     const { images, ...productToSave } = data;
-    //hacer submit de un objeto FormData para que viaje al back
+
     if (product.id) {
       formData.append("id", product.id ?? "");
     }
@@ -210,7 +199,7 @@ export const ProductForm = ({ product, categories }: Props) => {
               // bg-blue-500 text-white <--- si está seleccionado
               <div
                 key={size}
-                onClick={() => onSizeChange(size)}
+                onClick={() => onSizeChanged(size)}
                 className={clsx(
                   "p-2 border cursor-pointer rounded-md mr-2 mb-2 w-14 transition-all text-center",
                   {
@@ -238,16 +227,17 @@ export const ProductForm = ({ product, categories }: Props) => {
             {product.ProductImage?.map((image) => (
               <div key={image.id}>
                 <ProductImage
-                  alt={product.title}
+                  alt={product.title ?? ""}
                   src={image.url}
                   width={300}
                   height={300}
                   className="rounded-t shadow-md"
                 />
+
                 <button
                   type="button"
                   onClick={() => deleteProductImage(image.id, image.url)}
-                  className="btn-danger rounded-b-xl w-full"
+                  className="btn-danger w-full rounded-b-xl"
                 >
                   Eliminar
                 </button>

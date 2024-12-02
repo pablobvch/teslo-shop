@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth.config";
+import prisma from "@/lib/prisma";
 
 export const changeUserRole = async (
   userId: string,
@@ -26,7 +27,7 @@ export const changeUserRole = async (
         id: userId
       },
       data: {
-        role
+        role: newRole
       }
     });
 

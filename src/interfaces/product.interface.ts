@@ -25,7 +25,7 @@ export interface Product {
 export interface ProductImage {
   id: number;
   url: string;
-  productId: number;
+  productId: string;
 }
 
 type Category = "men" | "women" | "kid" | "unisex";

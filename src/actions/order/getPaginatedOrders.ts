@@ -2,7 +2,6 @@
 
 import { auth } from "@/auth.config";
 import prisma from "@/lib/prisma";
-import okta from "next-auth/providers/okta";
 
 export const getPaginatedOrders = async () => {
   const session = await auth();
@@ -10,30 +9,26 @@ export const getPaginatedOrders = async () => {
   if (session?.user.role !== "admin") {
     return {
       ok: false,
-      message: "Debe estar autenticado"
+      message: "Debe de estar autenticado"
     };
   }
 
-  try {
-    const orders = await prisma.order.findMany({
-      orderBy: {
-        createdAt: "desc"
-      },
-      include: {
-        OrderAddress: {
-          select: { firstName: true, lastName: true }
+  const orders = await prisma.order.findMany({
+    orderBy: {
+      createdAt: "desc"
+    },
+    include: {
+      OrderAddress: {
+        select: {
+          firstName: true,
+          lastName: true
         }
       }
-    });
+    }
+  });
 
-    return {
-      ok: true,
-      orders
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      message: `Error: ${error.message}`
-    };
-  }
+  return {
+    ok: true,
+    orders: orders
+  };
 };
