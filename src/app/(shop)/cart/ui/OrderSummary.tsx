@@ -3,8 +3,10 @@ import { titleFont } from "@/config/fonts";
 import { useCartStore } from "@/store";
 import React, { useEffect, useState } from "react";
 import { currencyFormat } from "../../../../utils/currencyFormater";
+import { useRouter } from "next/navigation";
 
 export const OrderSummary = () => {
+  const router = useRouter();
   const [loaded, setLoaded] = useState(false);
   const { subTotal, tax, total, itemsInCart } = useCartStore((state) =>
     state.getSummaryInformation()
@@ -13,6 +15,12 @@ export const OrderSummary = () => {
   useEffect(() => {
     setLoaded(true);
   }, []);
+
+  useEffect(() => {
+    if (itemsInCart === 0 && loaded === true) {
+      router.replace("/empty");
+    }
+  }, [itemsInCart, loaded, router]);
 
   if (!loaded) {
     return (
