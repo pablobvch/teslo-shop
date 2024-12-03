@@ -1,13 +1,9 @@
-import Link from "next/link";
-
-import { OrderStatus, PayPalButton, Title } from "@/components";
-import { initialData } from "@/seed/seed";
-import Image from "next/image";
-import clsx from "clsx";
-import { IoCardOutline } from "react-icons/io5";
-import { getOrderById } from "@/actions";
 import { redirect } from "next/navigation";
-import { currencyFormat } from "../../../../utils/currencyFormater";
+import Image from "next/image";
+
+import { currencyFormat } from "@/utils";
+import { OrderStatus, PayPalButton, Title } from "@/components";
+import { getOrderById } from "@/actions";
 
 interface Props {
   params: {
@@ -18,15 +14,15 @@ interface Props {
 export default async function OrdersByIdPage({ params }: Props) {
   const { id } = params;
 
-  const { order, ok } = await getOrderById(id);
+  // Todo: Llamar el server action
+
+  const { ok, order } = await getOrderById(id);
 
   if (!ok) {
     redirect("/");
   }
 
-  const address = order.OrderAddress;
-
-  const orderItems = order?.OrderItem;
+  const address = order!.OrderAddress;
 
   return (
     <div className="flex justify-center items-center mb-72 px-10 sm:px-0">
@@ -36,11 +32,12 @@ export default async function OrdersByIdPage({ params }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
           {/* Carrito */}
           <div className="flex flex-col mt-5">
-            <OrderStatus isPaid={order.isPaid ?? false}></OrderStatus>
+            <OrderStatus isPaid={order?.isPaid ?? false} />
+
             {/* Items */}
-            {order?.OrderItem.map((item) => (
+            {order!.OrderItem.map((item) => (
               <div
-                key={`${item.product.slug}-${item.size}`}
+                key={item.product.slug + "-" + item.size}
                 className="flex mb-5"
               >
                 <Image
@@ -53,7 +50,6 @@ export default async function OrdersByIdPage({ params }: Props) {
                   }}
                   alt={item.product.title}
                   className="mr-5 rounded"
-                  priority
                 />
 
                 <div>
@@ -74,15 +70,15 @@ export default async function OrdersByIdPage({ params }: Props) {
             <h2 className="text-2xl mb-2">Dirección de entrega</h2>
             <div className="mb-10">
               <p className="text-xl">
-                {address.firstName} {address.lastName}
+                {address!.firstName} {address!.lastName}
               </p>
-              <p className="font-bold">{address.address}</p>
-              <p className="font-bold">{address.address2}</p>
-              <p>{address.postalCode}</p>
+              <p>{address!.address}</p>
+              <p>{address!.address2}</p>
+              <p>{address!.postalCode}</p>
               <p>
-                {address.city}, {address.country}
+                {address!.city}, {address!.countryId}
               </p>
-              <p>{address.phone}</p>
+              <p>{address!.phone}</p>
             </div>
 
             {/* Divider */}
@@ -93,27 +89,28 @@ export default async function OrdersByIdPage({ params }: Props) {
             <div className="grid grid-cols-2">
               <span>No. Productos</span>
               <span className="text-right">
-                {order?.itemsInOrder}{" "}
-                {order?.itemsInOrder === 1 ? "articulo" : "articulos"}
+                {order?.itemsInOrder === 1
+                  ? "1 artículo"
+                  : `${order?.itemsInOrder} artículos`}
               </span>
 
               <span>Subtotal</span>
               <span className="text-right">
-                {currencyFormat(order.subTotal)}
+                {currencyFormat(order!.subTotal)}
               </span>
 
               <span>Impuestos (15%)</span>
-              <span className="text-right">{currencyFormat(order.tax)}</span>
+              <span className="text-right">{currencyFormat(order!.tax)}</span>
 
               <span className="mt-5 text-2xl">Total:</span>
               <span className="mt-5 text-2xl text-right">
-                {currencyFormat(order.total)}
+                {currencyFormat(order!.total)}
               </span>
             </div>
 
             <div className="mt-5 mb-2 w-full">
               {order?.isPaid ? (
-                <OrderStatus isPaid={order?.isPaid ?? false}></OrderStatus>
+                <OrderStatus isPaid={order?.isPaid ?? false} />
               ) : (
                 <PayPalButton amount={order!.total} orderId={order!.id} />
               )}

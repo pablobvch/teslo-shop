@@ -1,8 +1,12 @@
 "use client";
-import { titleFont } from "@/config/fonts";
+
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
-import { CreateOrderData, CreateOrderActions } from "@paypal/paypal-js";
-import React from "react";
+import {
+  CreateOrderData,
+  CreateOrderActions,
+  OnApproveActions,
+  OnApproveData
+} from "@paypal/paypal-js";
 import { paypalCheckPayment, setTransactionId } from "@/actions";
 
 interface Props {
@@ -13,13 +17,13 @@ interface Props {
 export const PayPalButton = ({ orderId, amount }: Props) => {
   const [{ isPending }] = usePayPalScriptReducer();
 
-  const roundedAmount = Math.round(amount * 100) / 100;
+  const rountedAmount = Math.round(amount * 100) / 100; //123.23
 
   if (isPending) {
     return (
-      <div className={`animate-pulse mb-16`}>
-        <div className="h-9 bg-gray-300" />
-        <div className="h-9 bg-gray-300 mt-2" />
+      <div className="animate-pulse mb-16">
+        <div className="h-11 bg-gray-300 rounded" />
+        <div className="h-11 bg-gray-300 rounded mt-2" />
       </div>
     );
   }
@@ -27,17 +31,21 @@ export const PayPalButton = ({ orderId, amount }: Props) => {
   const createOrder = async (
     data: CreateOrderData,
     actions: CreateOrderActions
-  ) => {
+  ): Promise<string> => {
     const transactionId = await actions.order.create({
       purchase_units: [
-        { invoice_id: orderId, amount: { value: roundedAmount.toString() } }
+        {
+          invoice_id: orderId,
+          amount: {
+            value: `${rountedAmount}`
+          }
+        }
       ]
     });
 
     const { ok } = await setTransactionId(orderId, transactionId);
-
     if (!ok) {
-      throw new Error(`No se pudo actualizar la orden`);
+      throw new Error("No se pudo actualizar la orden");
     }
 
     return transactionId;
@@ -46,8 +54,13 @@ export const PayPalButton = ({ orderId, amount }: Props) => {
   const onApprove = async (data: OnApproveData, actions: OnApproveActions) => {
     const details = await actions.order?.capture();
     if (!details) return;
+
     await paypalCheckPayment(details.id);
   };
 
-  return <PayPalButtons createOrder={createOrder} onApprove={onApprove} />;
+  return (
+    <div className="relative z-0">
+      <PayPalButtons createOrder={createOrder} onApprove={onApprove} />
+    </div>
+  );
 };

@@ -7,17 +7,19 @@ export const setTransactionId = async (
   transactionId: string
 ) => {
   try {
-    await prisma.order.update({
-      where: {
-        id: orderId
-      },
-      data: {
-        transactionId
-      }
+    const order = await prisma.order.update({
+      where: { id: orderId },
+      data: { transactionId: transactionId }
     });
-    return {
-      ok: true
-    };
+
+    if (!order) {
+      return {
+        ok: false,
+        message: `No se encontró una orden con el ${orderId}`
+      };
+    }
+
+    return { ok: true };
   } catch (error) {
     console.log(error);
     if (error instanceof Error) {
@@ -26,5 +28,9 @@ export const setTransactionId = async (
         message: error.message
       };
     }
+    return {
+      ok: false,
+      message: "General Error"
+    };
   }
 };
